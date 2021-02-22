@@ -486,7 +486,7 @@ class LicenseInfoResolverTest : WordSpec() {
                     patterns = LicenseFilenamePatterns.DEFAULT.licenseFilenames,
                     storage = LocalFileStorage(fileStorageDirectory)
                 )
-                archiver.archive(File("src/test/assets/archive-contents"), pkgId, provenance)
+                archiver.archive(File("src/test/assets/archive-contents"), provenance)
 
                 val resolver = createResolver(licenseInfos, archiver = archiver)
 
