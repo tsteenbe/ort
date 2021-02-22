@@ -137,7 +137,7 @@ class FileArchiver(
 }
 
 private fun getArchivePath(provenance: Provenance): String =
-    "${provenance.hash()}/archive.zip"
+    "archives/${provenance.hash()}/archive.zip"
 
 private val SHA1_DIGEST by lazy { MessageDigest.getInstance("SHA-1") }
 
