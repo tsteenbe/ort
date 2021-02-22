@@ -21,6 +21,8 @@ package org.ossreviewtoolkit.model.licenses
 
 import io.kotest.assertions.show.show
 import io.kotest.core.spec.style.WordSpec
+import io.kotest.core.test.TestCase
+import io.kotest.core.test.TestResult
 import io.kotest.matchers.Matcher
 import io.kotest.matchers.MatcherResult
 import io.kotest.matchers.collections.beEmpty
@@ -32,6 +34,8 @@ import io.kotest.matchers.shouldBe
 
 import java.io.File
 import java.lang.IllegalArgumentException
+
+import kotlin.io.path.createTempDirectory
 
 import org.ossreviewtoolkit.model.CopyrightFinding
 import org.ossreviewtoolkit.model.Hash
@@ -56,10 +60,22 @@ import org.ossreviewtoolkit.spdx.SpdxSingleLicenseExpression
 import org.ossreviewtoolkit.spdx.getLicenseText
 import org.ossreviewtoolkit.spdx.toSpdx
 import org.ossreviewtoolkit.utils.DeclaredLicenseProcessor
+import org.ossreviewtoolkit.utils.ORT_NAME
+import org.ossreviewtoolkit.utils.safeDeleteRecursively
 import org.ossreviewtoolkit.utils.storage.LocalFileStorage
 import org.ossreviewtoolkit.utils.test.createDefault
 
 class LicenseInfoResolverTest : WordSpec() {
+    private lateinit var fileStorageDirectory: File
+
+    override fun beforeTest(testCase: TestCase) {
+        fileStorageDirectory = createTempDirectory("$ORT_NAME-${javaClass.simpleName}").toFile()
+    }
+
+    override fun afterTest(testCase: TestCase, result: TestResult) {
+        fileStorageDirectory.safeDeleteRecursively(force = true)
+    }
+
     init {
         val pkgId = Identifier("Gradle:org.ossreviewtoolkit:ort:1.0.0")
         val vcsInfo = VcsInfo(VcsType.GIT, "https://github.com/oss-review-toolkit/ort.git", "master", "master")
@@ -466,11 +482,12 @@ class LicenseInfoResolverTest : WordSpec() {
                     )
                 )
 
-                val archiveDir = File("src/test/assets/archive")
                 val archiver = FileArchiver(
                     patterns = LicenseFilenamePatterns.DEFAULT.licenseFilenames,
-                    storage = LocalFileStorage(archiveDir)
+                    storage = LocalFileStorage(fileStorageDirectory)
                 )
+                archiver.archive(File("src/test/assets/archive-contents"), pkgId, provenance)
+
                 val resolver = createResolver(licenseInfos, archiver = archiver)
 
                 val result = resolver.resolveLicenseFiles(pkgId)
