@@ -40,6 +40,7 @@ forbid_telemetry: true
 
 containers:
   build:
+    privileged: true
     image: eclipse-temurin:17-jdk-alpine
     <<: *common-container-config
 
