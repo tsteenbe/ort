@@ -34,7 +34,6 @@ import org.ossreviewtoolkit.analyzer.PackageManager
 import org.ossreviewtoolkit.analyzer.managers.utils.NuGetDependency
 import org.ossreviewtoolkit.analyzer.managers.utils.NuGetSupport
 import org.ossreviewtoolkit.analyzer.managers.utils.XmlPackageFileReader
-import org.ossreviewtoolkit.analyzer.managers.utils.resolveNuGetDependencies
 import org.ossreviewtoolkit.model.ProjectAnalyzerResult
 import org.ossreviewtoolkit.model.config.AnalyzerConfiguration
 import org.ossreviewtoolkit.model.config.RepositoryConfiguration
@@ -62,7 +61,7 @@ class DotNet(
     private val reader = DotNetPackageFileReader()
 
     override fun resolveDependencies(definitionFile: File, labels: Map<String, String>): List<ProjectAnalyzerResult> =
-        listOf(resolveNuGetDependencies(definitionFile, reader, NuGetSupport.create(definitionFile)))
+        listOf(NuGetSupport.create(definitionFile).run { resolveNuGetDependencies(definitionFile, reader) })
 }
 
 /**
