@@ -21,6 +21,8 @@ package org.ossreviewtoolkit.cli.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ProgramResult
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 
 import java.io.File
 import java.lang.reflect.Modifier
@@ -31,6 +33,7 @@ import org.ossreviewtoolkit.model.config.AnalyzerConfiguration
 import org.ossreviewtoolkit.model.config.DownloaderConfiguration
 import org.ossreviewtoolkit.model.config.RepositoryConfiguration
 import org.ossreviewtoolkit.model.config.ScannerConfiguration
+import org.ossreviewtoolkit.scanner.CommandLineScanner
 import org.ossreviewtoolkit.scanner.Scanner
 import org.ossreviewtoolkit.utils.common.CommandLineTool
 import org.ossreviewtoolkit.utils.core.log
@@ -38,6 +41,11 @@ import org.ossreviewtoolkit.utils.core.log
 import org.reflections.Reflections
 
 class RequirementsCommand : CliktCommand(help = "Check for the command line tools required by ORT.") {
+    private val bootstrapScanners by option(
+        "--bootstrap-scanners",
+        help = "Bootstrap command line scanners if not already installed."
+    ).flag()
+
     override fun run() {
         val reflections = Reflections("org.ossreviewtoolkit")
         val classes = reflections.getSubTypesOf(CommandLineTool::class.java)
@@ -92,6 +100,17 @@ class RequirementsCommand : CliktCommand(help = "Check for the command line tool
                     else -> {
                         log.debug { "Trying to instantiate $it without any arguments." }
                         it.getDeclaredConstructor().newInstance()
+                    }
+                }
+
+                if (bootstrapScanners && instance is CommandLineScanner) {
+                    runCatching {
+                        println("Trying to bootstrap scanner '${instance.scannerName}'...")
+                        instance.bootstrap()
+                    }.onSuccess {
+                        println("Successfully bootstrapped scanner '${instance.scannerName}' to '$it'.")
+                    }.onFailure {
+                        println("Failed to bootstrap scanner '${instance.scannerName}'.")
                     }
                 }
 

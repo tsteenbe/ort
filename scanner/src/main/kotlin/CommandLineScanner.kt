@@ -105,5 +105,5 @@ abstract class CommandLineScanner(
      *
      * @return The directory the scanner is installed in.
      */
-    protected open fun bootstrap(): File = throw NotImplementedError()
+    open fun bootstrap(): File = throw NotImplementedError()
 }
