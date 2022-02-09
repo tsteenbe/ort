@@ -53,7 +53,6 @@ class Askalono(
             Askalono(scannerName, scannerConfig, downloaderConfig)
     }
 
-    override val name = "Askalono"
     override val criteria by lazy { getScannerCriteria() }
     override val expectedVersion = BuildConfig.ASKALONO_VERSION
     override val configuration = ""
@@ -66,10 +65,10 @@ class Askalono(
         output.removePrefix("askalono ")
 
     override fun bootstrap(): File {
-        val unpackDir = ortToolsDirectory.resolve(name).resolve(expectedVersion)
+        val unpackDir = ortToolsDirectory.resolve(details.name).resolve(expectedVersion)
 
         if (unpackDir.resolve(command()).isFile) {
-            log.info { "Skipping to bootstrap $name as it was found in $unpackDir." }
+            log.info { "Skipping to bootstrap ${details.name} as it was found in $unpackDir." }
             return unpackDir
         }
 

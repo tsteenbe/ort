@@ -103,7 +103,6 @@ class ScanCode(
         }
     }
 
-    override val name = SCANNER_NAME
     override val criteria by lazy { getScannerCriteria() }
     override val expectedVersion = BuildConfig.SCANCODE_VERSION
 
@@ -140,11 +139,11 @@ class ScanCode(
 
     override fun bootstrap(): File {
         val versionWithoutHyphen = expectedVersion.replace("-", "")
-        val unpackDir = ortToolsDirectory.resolve(name).resolve(expectedVersion)
+        val unpackDir = ortToolsDirectory.resolve(details.name).resolve(expectedVersion)
         val scannerDir = unpackDir.resolve("scancode-toolkit-$versionWithoutHyphen")
 
         if (scannerDir.resolve(command()).isFile) {
-            log.info { "Skipping to bootstrap $name as it was found in $unpackDir." }
+            log.info { "Skipping to bootstrap ${details.name} as it was found in $unpackDir." }
             return scannerDir
         }
 

@@ -189,7 +189,6 @@ class FossId internal constructor(
     private val service = config.createService()
 
     override val criteria: ScannerCriteria? = null
-    override val name: String = "FossId"
     override val version: String = service.version
 
     override val configuration = ""

@@ -54,7 +54,6 @@ class Licensee(
         val CONFIGURATION_OPTIONS = listOf("--json")
     }
 
-    override val name = "Licensee"
     override val criteria by lazy { getScannerCriteria() }
     override val expectedVersion = BuildConfig.LICENSEE_VERSION
     override val configuration = CONFIGURATION_OPTIONS.joinToString(" ")

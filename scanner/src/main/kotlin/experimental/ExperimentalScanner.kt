@@ -112,14 +112,14 @@ class ExperimentalScanner(
         val filteredScannerOptions = mutableMapOf<String, ScannerOptions>()
 
         projectScannerWrappers.forEach { scannerWrapper ->
-            scannerConfig.options?.get(scannerWrapper.name)?.let { options ->
-                filteredScannerOptions[scannerWrapper.name] = scannerWrapper.filterSecretOptions(options)
+            scannerConfig.options?.get(scannerWrapper.details.name)?.let { options ->
+                filteredScannerOptions[scannerWrapper.details.name] = scannerWrapper.filterSecretOptions(options)
             }
         }
 
         packageScannerWrappers.forEach { scannerWrapper ->
-            scannerConfig.options?.get(scannerWrapper.name)?.let { options ->
-                filteredScannerOptions[scannerWrapper.name] = scannerWrapper.filterSecretOptions(options)
+            scannerConfig.options?.get(scannerWrapper.details.name)?.let { options ->
+                filteredScannerOptions[scannerWrapper.details.name] = scannerWrapper.filterSecretOptions(options)
             }
         }
 
@@ -170,7 +170,7 @@ class ExperimentalScanner(
             "Read stored scan results in $readDuration:"
         }
         storedResults.entries.forEach { (scanner, results) ->
-            log.info { "\t${scanner.name}: Results for ${results.size} of ${allKnownProvenances.size} provenances." }
+            log.info { "\t${scanner.details.name}: Results for ${results.size} of ${allKnownProvenances.size} provenances." }
         }
 
         scanResults += storedResults
@@ -189,14 +189,14 @@ class ExperimentalScanner(
             // TODO: Verify that there are still missing scan results for the package, previous scan of another package
             //       from the same repository could have fixed that already.
             scanners.filterIsInstance<PackageScannerWrapper>().forEach { scanner ->
-                log.info { "Scanning ${pkg.id.toCoordinates()} with package scanner ${scanner.name}." }
+                log.info { "Scanning ${pkg.id.toCoordinates()} with package scanner ${scanner.details.name}." }
 
                 // Scan whole package with package scanner.
                 // TODO: Use coroutines to execute scanners in parallel.
                 val scanResult = scanner.scanPackage(pkg, context)
 
                 log.info {
-                    "Scan of ${pkg.id.toCoordinates()} with package scanner ${scanner.name} finished."
+                    "Scan of ${pkg.id.toCoordinates()} with package scanner ${scanner.details.name} finished."
                 }
 
                 // Split scan results by provenance and add them to the map of scan results.
@@ -241,13 +241,13 @@ class ExperimentalScanner(
             // Scan provenances with provenance scanners.
             // TODO: Move to function.
             scanners.filterIsInstance<ProvenanceScannerWrapper>().forEach { scanner ->
-                log.info { "Scanning $provenance with provenance scanner ${scanner.name}." }
+                log.info { "Scanning $provenance with provenance scanner ${scanner.details.name}." }
 
                 // TODO: Use coroutines to execute scanners in parallel.
                 val scanResult = scanner.scanProvenance(provenance, context)
 
                 log.info {
-                    "Scan of $provenance with provenance scanner ${scanner.name} finished."
+                    "Scan of $provenance with provenance scanner ${scanner.details.name} finished."
                 }
 
                 val scanResultsForScanner = scanResults.getOrPut(scanner) { mutableMapOf() }
@@ -302,7 +302,7 @@ class ExperimentalScanner(
             storageWriters.filterIsInstance<PackageBasedScanStorageWriter>().forEach { writer ->
                 nestedProvenanceScanResults[pkg]?.let { nestedProvenanceScanResult ->
                     val filteredScanResult = nestedProvenanceScanResult.filter { scanResult ->
-                        scanners.find { it.name == scanResult.scanner.name }?.criteria != null
+                        scanners.find { it.details.name == scanResult.scanner.name }?.criteria != null
                     }
 
                     if (filteredScanResult.isComplete()) {
@@ -501,10 +501,10 @@ class ExperimentalScanner(
 
         return try {
             scanners.associateWith { scanner ->
-                log.info { "Scanning $provenance with path scanner ${scanner.name}." }
+                log.info { "Scanning $provenance with path scanner ${scanner.details.name}." }
 
                 val summary = scanner.scanPath(downloadDir, context)
-                log.info { "Scan of $provenance with path scanner ${scanner.name} finished." }
+                log.info { "Scan of $provenance with path scanner ${scanner.details.name} finished." }
 
                 ScanResult(provenance, scanner.details, summary)
             }

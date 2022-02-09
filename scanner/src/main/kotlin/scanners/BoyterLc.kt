@@ -62,7 +62,6 @@ class BoyterLc(
         )
     }
 
-    override val name = "BoyterLc"
     override val criteria by lazy { getScannerCriteria() }
     override val expectedVersion = BuildConfig.BOYTER_LC_VERSION
     override val configuration = CONFIGURATION_OPTIONS.joinToString(" ")
@@ -75,10 +74,10 @@ class BoyterLc(
         output.removePrefix("licensechecker version ")
 
     override fun bootstrap(): File {
-        val unpackDir = ortToolsDirectory.resolve(name).resolve(expectedVersion)
+        val unpackDir = ortToolsDirectory.resolve(details.name).resolve(expectedVersion)
 
         if (unpackDir.resolve(command()).isFile) {
-            log.info { "Skipping to bootstrap $name as it was found in $unpackDir." }
+            log.info { "Skipping to bootstrap ${details.name} as it was found in $unpackDir." }
             return unpackDir
         }
 
