@@ -36,6 +36,7 @@ import org.ossreviewtoolkit.model.OrtResult
 import org.ossreviewtoolkit.model.Package
 import org.ossreviewtoolkit.model.PackageType
 import org.ossreviewtoolkit.model.Provenance
+import org.ossreviewtoolkit.model.RepositoryProvenance
 import org.ossreviewtoolkit.model.ScanRecord
 import org.ossreviewtoolkit.model.ScanResult
 import org.ossreviewtoolkit.model.ScanSummary
@@ -141,15 +142,24 @@ class ExperimentalScanner(
             "Resolved provenance for ${packages.size} packages in $packageProvenanceDuration."
         }
 
+        // Remove all VCS paths from the provenances so that always the full repositories are scanned. The VCS paths
+        // will be used after scanning to correctly filter the scan results.
+        val packageProvenancesWithoutVcsPath = packageProvenances.mapValues { (_, provenance) ->
+            when (provenance) {
+                is RepositoryProvenance -> provenance.copy(vcsInfo = provenance.vcsInfo.copy(path = ""))
+                else -> provenance
+            }
+        }
+
         log.info { "Resolving nested provenances for ${packages.size} packages." }
         val (nestedProvenances, nestedProvenanceDuration) =
-            measureTimedValue { getNestedProvenances(packageProvenances) }
+            measureTimedValue { getNestedProvenances(packageProvenancesWithoutVcsPath) }
         log.info {
             "Resolved nested provenances for ${packages.size} packages in $nestedProvenanceDuration."
         }
 
         val allKnownProvenances = (
-                packageProvenances.values.filterIsInstance<KnownProvenance>() +
+                packageProvenancesWithoutVcsPath.values.filterIsInstance<KnownProvenance>() +
                         nestedProvenances.values.flatMap { nestedProvenance ->
                             nestedProvenance.subRepositories.values
                         }
@@ -324,7 +334,7 @@ class ExperimentalScanner(
 
         createFileArchives(nestedProvenances)
 
-        return nestedProvenanceScanResults
+        return nestedProvenanceScanResults.filterByVcsPath(packageProvenances)
     }
 
     private fun Collection<Package>.filterNotConcluded(): Collection<Package> =
@@ -594,3 +604,15 @@ private fun Map<ScannerWrapper, Map<KnownProvenance, List<ScanResult>>>.hasResul
     scanner: ScannerWrapper,
     provenance: Provenance
 ) = getValue(scanner)[provenance].let { it != null && it.isNotEmpty() }
+
+private fun Map<Package, NestedProvenanceScanResult>.filterByVcsPath(
+    packageProvenances: Map<Package, Provenance>
+): Map<Package, NestedProvenanceScanResult> =
+    mapValues { (pkg, nestedProvenanceScanResult) ->
+        val path = when (val packageProvenance = packageProvenances.getValue(pkg)) {
+            is RepositoryProvenance -> packageProvenance.vcsInfo.path
+            else -> ""
+        }
+
+        nestedProvenanceScanResult.filterByVcsPath(path)
+    }
