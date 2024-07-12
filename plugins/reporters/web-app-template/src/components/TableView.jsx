@@ -20,6 +20,8 @@
 import React from 'react';
 
 import {
+    CheckOutlined,
+    CloseOutlined,
     CloudDownloadOutlined,
     EyeOutlined,
     EyeInvisibleOutlined,
@@ -52,6 +54,7 @@ import {
 } from '../reducers/selectors';
 import store from '../store';
 
+import PackageCurations from './PackageCurations';
 import PackageDetails from './PackageDetails';
 import PackageFindingsTable from './PackageFindingsTable';
 import PackageLicenses from './PackageLicenses';
@@ -321,6 +324,53 @@ class TableView extends React.Component {
             }
         }
 
+        if (webAppOrtResult.hasCuratedPackages()) {
+            toggleColumnMenuItems.push({ text: 'Curated', value: 'curated' });
+
+            if (showKeys.includes('curated')) {
+                columns.push({
+                    align: 'left',
+                    filters: (() => [
+                        {
+                            text: (
+                            <span>
+                                <CheckOutlined/>
+                                {' '}
+                                Yes
+                            </span>
+                            ),
+                            value: true
+                        },
+                        {
+                            text: (
+                            <span>
+                                <CloseOutlined />
+                                {' '}
+                                No
+                            </span>
+                            ),
+                            value: false
+                        }
+                    ])(),
+                    key: 'curated',
+                    textWrap: 'word-break',
+                    title: 'Curated',
+                    filteredValue: filteredInfo.curated || null,
+                    onFilter: (value, webAppPackage) => {
+                        const isCurated = webAppPackage.hasCurations();
+
+                        return isCurated && value;
+                    },
+                    render: (webAppPackage) => (
+                        webAppPackage.hasCurations()
+                            ? (<CheckOutlined className="ort-curated-package" />)
+                            : (<CloseOutlined/>)
+                    ),
+                    width: '6%'
+                });
+            }
+        }
+
         toggleColumnMenuItems.push({ text: 'Homepage', value: 'homepageUrl' });
         if (showKeys.includes('homepageUrl')) {
             columns.push({
@@ -447,6 +497,16 @@ class TableView extends React.Component {
                                             )
                                         }
                                     ];
+
+                                    if (webAppPackage.hasCurations()) {
+                                        collapseItems.push({
+                                            label: 'Curations',
+                                            key: 'package-curations',
+                                            children: (
+                                                <PackageCurations curations={webAppPackage.curations} />
+                                            )
+                                        });
+                                    }
 
                                     if (webAppPackage.hasLicenses()) {
                                         collapseItems.push({

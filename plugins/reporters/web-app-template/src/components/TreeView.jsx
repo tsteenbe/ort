@@ -46,6 +46,7 @@ import {
 } from '../reducers/selectors';
 import store from '../store';
 
+import PackageCurations from './PackageCurations';
 import PackageDetails from './PackageDetails';
 import PackageFindingsTable from './PackageFindingsTable';
 import PackageLicenses from './PackageLicenses';
@@ -288,6 +289,18 @@ class TreeView extends React.Component {
                                                 )
                                             }
                                         ];
+
+                                        if (selectedWebAppTreeNode.package.hasCurations()) {
+                                            collapseItems.push({
+                                                label: 'Curations',
+                                                key: 'package-curations',
+                                                children: (
+                                                    <PackageCurations
+                                                        curations={selectedWebAppTreeNode.package.curations}
+                                                    />
+                                                )
+                                            });
+                                        }
 
                                         if (selectedWebAppTreeNode.package.hasLicenses()) {
                                             collapseItems.push({

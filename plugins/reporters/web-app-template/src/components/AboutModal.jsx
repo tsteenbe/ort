@@ -39,6 +39,8 @@ import {
 } from '../reducers/selectors';
 import store from '../store';
 
+import CuratedPackages from './CuratedPackages';
+
 const { Item } = Descriptions;
 
 SyntaxHighlighter.registerLanguage('yaml', yaml);
@@ -137,6 +139,21 @@ const AboutModal = ({ webAppOrtResult }) => {
                                         ))
                                     }
                                 </Descriptions>
+                            )
+                        });
+                    }
+
+                    if (webAppOrtResult.hasCuratedPackages()) {
+                        tabItems.push({
+                            label: (
+                                <span>
+                                    <TagsOutlined />
+                                    Curations
+                                </span>
+                            ),
+                            key: 'ort-tabs-curated-packages',
+                            children: (
+                                <CuratedPackages packages={webAppOrtResult.curationsByPackageIdMap}/>
                             )
                         });
                     }
