@@ -19,6 +19,7 @@
 
 import { randomStringGenerator } from '../utils';
 
+import PackageCurationResult from './PackageCurationResult';
 import RemoteArtifact from './RemoteArtifact';
 import VcsInfo from './VcsInfo';
 import WebAppFinding from './WebAppFinding';
@@ -73,6 +74,8 @@ class WebAppPackage {
     #homepageUrl;
 
     #id;
+
+    #isCurated = false;
 
     #isExcluded = false;
 
@@ -143,7 +146,13 @@ class WebAppPackage {
             }
 
             if (obj.curations) {
-                this.#curations = obj.curations;
+                for (let i = 0, len = obj.curations.length; i < len; i++) {
+                    this.#curations.push(new PackageCurationResult(obj.curations[i]));
+                }
+
+                if (obj.curations.length > 0) {
+                    this.#isCurated = true;
+                }
             }
 
             if (obj.declared_licenses || obj.declaredLicenses) {
@@ -433,6 +442,10 @@ class WebAppPackage {
         return this.#id;
     }
 
+    get isCurated() {
+        return this.#isCurated;
+    }
+
     get isExcluded() {
         return this.#isExcluded;
     }
@@ -634,6 +647,10 @@ class WebAppPackage {
     hasConcludedLicense() {
         return this.#concludedLicense
             && this.#concludedLicense.length !== 0;
+    }
+
+    hasCurations() {
+        return this.#curations.length > 0;
     }
 
     hasDeclaredLicenses() {

@@ -39,6 +39,10 @@ class WebAppOrtResult {
 
     #copyrights = [];
 
+    #curatedPackages = [];
+
+    #curationsByPackageIdMap = new Map();
+
     #declaredLicenses = [];
 
     #declaredLicensesProcessed = [];
@@ -74,6 +78,8 @@ class WebAppOrtResult {
     #metadata = {};
 
     #packages = [];
+
+    #packagesIndexesByPackageIdMap = new Map();
 
     #pathExcludes = [];
 
@@ -165,6 +171,14 @@ class WebAppOrtResult {
                         && webAppPackage.effectiveLicense.length > 0) {
                         this.#effectiveLicensePackages.push(webAppPackage);
                     }
+
+                    if (webAppPackage.hasCurations()) {
+                        this.#curatedPackages.push(webAppPackage);
+
+                        this.#curationsByPackageIdMap.set(webAppPackage.id, webAppPackage.curations);
+                    }
+
+                    this.#packagesIndexesByPackageIdMap.set(webAppPackage.id, packages[i]._id);
                 }
             }
 
@@ -375,6 +389,14 @@ class WebAppOrtResult {
         return this.#concludedLicensePackages;
     }
 
+    get curatedPackages() {
+        return this.#curatedPackages;
+    }
+
+    get curationsByPackageIdMap() {
+        return this.#curationsByPackageIdMap;
+    }
+
     get copyrights() {
         return this.#copyrights;
     }
@@ -433,6 +455,10 @@ class WebAppOrtResult {
 
     get packages() {
         return this.#packages;
+    }
+
+    get packagesIndexesByPackageIdMap() {
+        return this.#packagesIndexesByPackageIdMap;
     }
 
     get pathExcludes() {
@@ -511,6 +537,10 @@ class WebAppOrtResult {
         return this.#packages[val] || null;
     }
 
+    getPackageIndexForPackageId(val) {
+        return this.#packagesIndexesByPackageIdMap.get(val) || null;
+    }
+
     getPathByIndex(val) {
         return this.#paths[val] || null;
     }
@@ -569,6 +599,10 @@ class WebAppOrtResult {
 
     hasConcludedLicenses() {
         return this.#concludedLicensePackages.length > 0;
+    }
+
+    hasCuratedPackages() {
+        return this.#curatedPackages.length > 0;
     }
 
     hasDeclaredLicenses() {
