@@ -1,52 +1,33 @@
 import React from 'react';
-import { Collapse, Descriptions, Typography, Space, Row, Col } from 'antd';
+import { Collapse, Descriptions, Typography, Space } from 'antd';
 import PropTypes from 'prop-types';
 
 const { Item } = Descriptions;
-const { Text, Link } = Typography;
+const { Text } = Typography;
 
 const PackageCurations = ({ curations }) => {
-    console.log('Curations received:', curations);
 
     if (!curations || curations.length === 0) {
         return <Text>No curations available for this package.</Text>;
     }
 
-    const hasNonEmptyValues = (obj) => {
-        if (!obj || typeof obj !== 'object') return false;
-        return Object.entries(obj).some(([key, value]) => {
-        if (key === 'hash' && typeof value === 'object') {
-            return value.algorithm && value.value;
+    const hasNonEmptyValues = (obj, seen = new WeakSet()) => {
+        if (obj === null) return false;
+
+        if (typeof obj === 'object'){
+
+            if (seen.has(obj)) return false; // Prevent circular reference loops
+            seen.add(obj);
+            
+            if (Array.isArray(obj)) {
+                return obj.length > 0 && obj.some(item => hasNonEmptyValues(item, seen));
+            }
+            
+            return Object.values(obj).some(value => hasNonEmptyValues(value, seen));
         }
-        return value !== null && value !== undefined && value !== '' &&
-            !(Array.isArray(value) && value.length === 0) &&
-            !(typeof value === 'object' && Object.keys(value).length === 0);
-        });
-    };
 
-    const renderRemoteArtifact = (artifact) => {
-        if (!artifact) return null;
-        return (
-        <>
-            {artifact.url && <div>URL: <Link href={artifact.url} target="_blank">{artifact.url}</Link></div>}
-            {artifact.hash && artifact.hash.value && <div>Hash: {artifact.hash.algorithm}: {artifact.hash.value}</div>}
-        </>
-        );
+        return obj !== undefined && obj !== '';
     };
-
-    const renderVcsInfo = (vcs) => {
-        if (!vcs) return null;
-        return (
-        <>
-            {vcs.type && <div>Type: {vcs.type}</div>}
-            {vcs.url && <div>URL: <Link href={vcs.url} target="_blank">{vcs.url}</Link></div>}
-            {vcs.revision && <div>Revision: {vcs.revision}</div>}
-            {vcs.resolvedRevision && <div>Resolved Revision: {vcs.resolvedRevision}</div>}
-            {vcs.path && <div>Path: {vcs.path}</div>}
-        </>
-        );
-    };
-
 
     const renderDiffValue = (baseValue, curationValue) => {
         const renderDiffObject = (base, curation) => {
@@ -103,25 +84,25 @@ const PackageCurations = ({ curations }) => {
         }
     };
 
-    const renderCurationData = (base, curation, index) => (
+    const renderCurationData = (base, curation) => (
         <Descriptions 
             bordered 
             column={1} 
             size="small"
             labelStyle={{ width: '150px', minWidth: '150px', padding: '8px 16px' }}
         >
-        {curation.comment && <Item label="Comment">{curation.comment}</Item>}
-        {curation.purl && <Item label="Package URL (PURL)">{renderDiffValue(base.purl, curation.purl)}</Item>}
-        {curation.cpe && <Item label="CPE">{renderDiffValue(base.cpe, curation.cpe)}</Item>}
-        {curation.authors && <Item label="Authors">{renderDiffValue(base.authors, curation.authors)}</Item>}
-        {curation.concludedLicense && <Item label="Concluded License">{renderDiffValue(base.concludedLicense, curation.concludedLicense)}</Item>}
-        {curation.description && <Item label="Description">{renderDiffValue(base.description, curation.description)}</Item>}
-        {curation.homepageUrl && <Item label="Homepage">{renderDiffValue(base.homepageUrl, curation.homepageUrl)}</Item>}
+        {hasNonEmptyValues(curation.comment) && <Item label="Comment">{curation.comment}</Item>}
+        {hasNonEmptyValues(curation.purl) && <Item label="Package URL (PURL)">{renderDiffValue(base.purl, curation.purl)}</Item>}
+        {hasNonEmptyValues(curation.cpe) && <Item label="CPE">{renderDiffValue(base.cpe, curation.cpe)}</Item>}
+        {hasNonEmptyValues(curation.authors) && <Item label="Authors">{renderDiffValue(base.authors, curation.authors)}</Item>}
+        {hasNonEmptyValues(curation.concludedLicense) && <Item label="Concluded License">{renderDiffValue(base.concludedLicense, curation.concludedLicense)}</Item>}
+        {hasNonEmptyValues(curation.description) && <Item label="Description">{renderDiffValue(base.description, curation.description)}</Item>}
+        {hasNonEmptyValues(curation.homepageUrl) && <Item label="Homepage">{renderDiffValue(base.homepageUrl, curation.homepageUrl)}</Item>}
         {hasNonEmptyValues(curation.binaryArtifact) && <Item label="Binary Artifact">{renderDiffValue(base.binaryArtifact, curation.binaryArtifact)}</Item>}
         {hasNonEmptyValues(curation.sourceArtifact) && <Item label="Source Artifact">{renderDiffValue(base.sourceArtifact, curation.sourceArtifact)}</Item>}
         {hasNonEmptyValues(curation.vcs) && <Item label="VCS Info">{renderDiffValue(base.vcs, curation.vcs)}</Item>}
-        {curation.isMetadataOnly !== undefined && <Item label="Is Metadata Only">{renderDiffValue(base.isMetadataOnly, curation.isMetadataOnly)}</Item>}
-        {curation.isModified !== undefined && <Item label="Is Modified">{renderDiffValue(base.isModified, curation.isModified)}</Item>}
+        {hasNonEmptyValues(curation.isMetadataOnly) && <Item label="Is Metadata Only">{renderDiffValue(base.isMetadataOnly, curation.isMetadataOnly)}</Item>}
+        {hasNonEmptyValues(curation.isModified) && <Item label="Is Modified">{renderDiffValue(base.isModified, curation.isModified)}</Item>}
         {hasNonEmptyValues(curation.declaredLicenseMapping) && <Item label="Declared License Mapping">{renderDiffValue(base.declaredLicenseMapping, curation.declaredLicenseMapping)}</Item>}
         {hasNonEmptyValues(curation.sourceCodeOrigins) && <Item label="Source Code Origins">{renderDiffValue(base.sourceCodeOrigins, curation.sourceCodeOrigins)}</Item>}
         </Descriptions>
