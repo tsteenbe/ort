@@ -104,7 +104,12 @@ const PackageCurations = ({ curations }) => {
     };
 
     const renderCurationData = (base, curation, index) => (
-        <Descriptions bordered column={1} size="small">
+        <Descriptions 
+            bordered 
+            column={1} 
+            size="small"
+            labelStyle={{ width: '150px', minWidth: '150px', padding: '8px 16px' }}
+        >
         {curation.comment && <Item label="Comment">{curation.comment}</Item>}
         {curation.purl && <Item label="Package URL (PURL)">{renderDiffValue(base.purl, curation.purl)}</Item>}
         {curation.cpe && <Item label="CPE">{renderDiffValue(base.cpe, curation.cpe)}</Item>}
