@@ -140,7 +140,13 @@ const PackageCurations = ({ curations }) => {
     return (
         <div>
         <Text>Total curations: {curations.length}</Text>
-        <Collapse size="small" ghost defaultActiveKey={allKeys} items={items} />
+        <Collapse 
+            size="small" 
+            ghost 
+            defaultActiveKey={allKeys} 
+            items={items}
+            aria-label="Package curations list"
+        />
         </div>
     );
 };
