@@ -92,6 +92,68 @@ const AppPage = ({ webAppOrtResult }) => {
         setActiveTab(key);
     };
 
+    const handleShowInResultsTable = (obj) => {
+        console.log("handleShowInResultsTable", resultsTableFilteredInfo);
+        console.log("handleShowInResultsTable2", obj);
+        switch (obj.licenseType) {
+            case "declared":
+                const licenseIndex = webAppOrtResult.getLicenseIndexByName(obj.licenseName);
+                console.log("licenseIndex", licenseIndex)
+                setResultsTableColumnsToShow([
+                    'declaredLicensesProcessed',
+                    'levels',
+                    'scopeIndexes'
+                ]);
+                setResultsTableFilteredInfo({
+                    excludes: [],
+                    id: [],
+                    declaredLicensesMapped: [licenseIndex],
+                    homepageUrl: [],
+                    vcsProcessedUrl: []
+                });
+                setResultsTablePagination({ current: 1, pageSize: 100 });
+                setResultsTableSortedInfo({});
+                setActiveTab('ort-tabs-table');
+                break;
+            case "detected":
+                setResultsTableColumnsToShow([
+                    'detectedLicensesProcessed',
+                    'levels',
+                    'scopeIndexes'
+                ]);
+                setResultsTableFilteredInfo({
+                    excludes: [],
+                    id: [],
+                    detectedLicensesProcessed: [`${obj.licensName}`],
+                    homepageUrl: [],
+                    vcsProcessedUrl: []
+                });
+                setResultsTablePagination({ current: 1, pageSize: 100 });
+                setResultsTableSortedInfo({});
+                console.log("handleShowInResultsTable changed", resultsTableFilteredInfo);
+                setActiveTab('ort-tabs-table');
+                break;
+            case "effective":
+                const { licenseName } = obj;
+                setResultsTableColumnsToShow([
+                    'effectiveLicense',
+                    'levels',
+                    'scopeIndexes'
+                ]);
+                setResultsTableFilteredInfo({
+                    excludes: [],
+                    id: [],
+                    effectiveLicense: [licenseName],
+                    homepageUrl: [],
+                    vcsProcessedUrl: []
+                });
+                setResultsTablePagination({ current: 1, pageSize: 100 });
+                setResultsTableSortedInfo({});
+                setActiveTab('ort-tabs-table');
+                break;
+        }
+    };
+
     return (
         <Layout className="ort-app">
             <Content>
@@ -118,7 +180,9 @@ const AppPage = ({ webAppOrtResult }) => {
                                     ),
                                     key: 'ort-tabs-summary',
                                     children: (
-                                        <ResultsSummary webAppOrtResult={ webAppOrtResult }/>
+                                        <ResultsSummary
+                                            showInResultsTable={handleShowInResultsTable}
+                                            webAppOrtResult={webAppOrtResult}/>
                                     )
                                 },
                                 {
@@ -137,7 +201,6 @@ const AppPage = ({ webAppOrtResult }) => {
                                             setColumnsToShow={setResultsTableColumnsToShow}
                                             setFilteredInfo={setResultsTableFilteredInfo}
                                             setPagination={setResultsTablePagination}
-                                            setPagination={setResultsTablePagination}
                                             sortedInfo={resultsTableSortedInfo}
                                             setSortedInfo={setResultsTableSortedInfo}
                                             webAppOrtResult={webAppOrtResult}
@@ -153,7 +216,7 @@ const AppPage = ({ webAppOrtResult }) => {
                                     ),
                                     key: 'ort-tabs-tree',
                                     children: (
-                                        <ResultsTree webAppOrtResult={ webAppOrtResult } />
+                                        <ResultsTree webAppOrtResult={webAppOrtResult} />
                                     )
                                 }
                             ]}

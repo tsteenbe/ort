@@ -53,7 +53,7 @@ class WebAppOrtResult {
 
     #effectiveLicenses = [];
 
-    #treeNodesByPackageIndexMap;
+    #treeNodesByPackageIndexMap = new Map();
 
     #treeNodesByKeyMap;
 
@@ -606,15 +606,15 @@ class WebAppOrtResult {
     }
 
     getLicenseByName(val) {
-        return this.#licenses[this.#licensesIndexesByNameMap.get(val)] || null;
+        return this.#licenses[this.#licensesIndexesByNameMap.get(val)];
     }
 
     getLicenseIndexByName(val) {
-        return this.#licensesIndexesByNameMap.get(val) || null;
+        return this.#licensesIndexesByNameMap.get(val);
     }
 
     getPackageById(val) {
-        return this.getPackageByKey(this.#packagesIdtoKeyMap.get(val)) || null;
+        return this.getPackageByKey(this.#packagesIdtoKeyMap.get(val));
     }
 
     getPackageByIndex(val) {
@@ -718,7 +718,7 @@ class WebAppOrtResult {
     }
 
     getScopeByName(val) {
-        return this.#scopesByNameMap.get(val) || null;
+        return this.#scopesByNameMap.get(val);
     }
 
     getScopeExcludeByIndex(val) {
@@ -730,15 +730,15 @@ class WebAppOrtResult {
     }
 
     getTreeNodeParentKeysByIndex(val) {
-        return this.#treeNodesByPackageIndexMap.get(val) || null;
+        return this.#treeNodesByPackageIndexMap.get(val);
     }
 
     getRuleViolationsForPackageIndex(val) {
-        return this.#ruleViolationsByPackageIndexMap.get(val) || [];
+        return this.#ruleViolationsByPackageIndexMap.get(val);
     }
 
     getVulnerabilitiesForPackageIndex(val) {
-        return this.#vulnerabilitiesByPackageIndexMap.get(val) || [];
+        return this.#vulnerabilitiesByPackageIndexMap.get(val);
     }
 
     getVulnerabilityResolutionByIndex(val) {

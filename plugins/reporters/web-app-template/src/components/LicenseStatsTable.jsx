@@ -25,7 +25,7 @@ import { FileTextOutlined } from '@ant-design/icons';
 import { Table } from 'antd';
 
 // Generates the HTML to display license stats as a table
-const LicenseStatsTable = ({ emptyText, licenses, licenseStats }) => {
+const LicenseStatsTable = ({ emptyText, licenses, licenseStats, handleLicenseClick }) => {
     /* === Table state handling === */
 
     // State variable for displaying table in various pages
@@ -55,8 +55,10 @@ const LicenseStatsTable = ({ emptyText, licenses, licenseStats }) => {
             key: 'name',
             render: (text, row) => (
                 <span>
-                    <FileTextOutlined style={{ color: row.color }} />
-                    {` ${text}`}
+                    <a onClick={(e) => { e.stopPropagation(); handleLicenseClick(text); }}>
+                        <FileTextOutlined style={{ color: row.color }} />
+                        {` ${text}`}
+                    </a>
                 </span>
             ),
             textWrap: 'word-break'
@@ -67,6 +69,13 @@ const LicenseStatsTable = ({ emptyText, licenses, licenseStats }) => {
             sorter: (a, b) => a.value - b.value,
             sortOrder: sortedInfo.columnKey === 'value' && sortedInfo.order,
             key: 'value',
+            render: (text, row) => (
+                <span>
+                    <a onClick={(e) => { e.stopPropagation(); handleLicenseClick(row.name); }}>
+                        {text}
+                    </a>
+                </span>
+            ),
             width: 150
         }
     ];
